@@ -24,9 +24,9 @@ async function getUserByUsername(username) {
 		ExpressionAttributeValues: { ':username': username }
 	});
 
-	const res = await documentClient.send(command);
-	console.log(res);
-	return res;
+	const data = await documentClient.send(command);
+	// console.log(res);
+	return data;
 }
 
 module.exports = {
