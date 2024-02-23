@@ -3,9 +3,7 @@ const { DynamoDBDocumentClient, QueryCommand, PutCommand } = require('@aws-sdk/l
 const client = new DynamoDBClient({ region: 'us-east-1' });
 const documentClient = DynamoDBDocumentClient.from(client);
 const uuid = require('uuid');
-// const USERS_TABLE = 'users';
 const USERS_TABLE = process.env.USERS_TABLE;
-// const USERNAME_INDEX = 'username-index';
 const USERNAME_INDEX = process.env.USERNAME_INDEX;
 
 async function createUser(username, password) {
