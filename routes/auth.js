@@ -55,4 +55,30 @@ router.post('/login', async (req, res) => {
 	}
 });
 
-module.exports = router;
+function authorize(req, res, next) {
+	const header = req.headers['authorization'];
+
+	if (!header) {
+		res.sendStatus(401);
+	} else {
+		const token = header.split(' ')[1];
+
+		if (!token) {
+			res.status(401);
+		} else {
+			jwt.verify(token, JWT_SECRET, (err, user) => {
+				if (err) {
+					res.status(401);
+				} else {
+					req.user = user;
+					next();
+				}
+			});
+		}
+	}
+}
+
+module.exports = {
+	router,
+	authorize
+};
