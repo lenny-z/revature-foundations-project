@@ -7,8 +7,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const NUM_SALT_ROUNDS = parseInt(process.env.NUM_SALT_ROUNDS);
 
 router.post('/register', async (req, res) => {
-	// const {username, password} = req.body;
-
 	try {
 		const data = await userDAO.getUserByUsername(req.body.username);
 
@@ -26,8 +24,6 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-	// const {username, password} = req.body;
-
 	try {
 		const data = await userDAO.getUserByUsername(req.body.username);
 
@@ -57,6 +53,6 @@ router.post('/login', async (req, res) => {
 		res.sendStatus(500);
 		console.error(err);
 	}
-})
+});
 
 module.exports = router;
