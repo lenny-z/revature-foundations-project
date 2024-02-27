@@ -6,11 +6,12 @@ const documentClient = DynamoDBDocumentClient.from(client);
 const uuid = require('uuid');
 const USERS_TABLE = process.env.USERS_TABLE;
 const USERNAME_INDEX = process.env.USERNAME_INDEX;
+const EMPLOYEE_ROLE = process.env.EMPLOYEE_ROLE;
 
 async function createUser(username, password) {
 	const command = new PutCommand({
 		TableName: USERS_TABLE,
-		Item: { id: uuid.v4(), username, password }
+		Item: { id: uuid.v4(), username, password, role: EMPLOYEE_ROLE }
 	});
 
 	const data = await documentClient.send(command);

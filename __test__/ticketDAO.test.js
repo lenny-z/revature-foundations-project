@@ -2,6 +2,7 @@ require('dotenv').config();
 const ticketDAO = require('../daos/ticketDAO.js');
 const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 const APPROVED_TICKET_STATUS = process.env.APPROVED_TICKET_STATUS;
+const DENIED_TICKET_STATUS = process.env.DENIED_TICKET_STATUS;
 
 test('createTicket', async () => {
 	const amount = Math.random() * 100;
@@ -14,19 +15,22 @@ test('createTicket', async () => {
 	expect(ticket).not.toBeNull();
 });
 
-test('approveTicket', async () => {
+async function testTicketStatusSetter(status, setter) {
 	let data = await ticketDAO.getTicketsByStatus(PENDING_TICKET_STATUS);
-	console.log(data.Items);
 	const tickets = data.Items;
-	// const randomTicket = tickets[0];
-	// console.log(Math.floor(Math.random() * tickets.length));
 	const randomTicket = tickets[Math.floor(Math.random() * tickets.length)];
-	// console.log(randomTicket);
-	await ticketDAO.approveTicket(randomTicket.id);
-	data = await ticketDAO.getTicketsByStatus(APPROVED_TICKET_STATUS);
-	console.log(data);
+	await setter(randomTicket.id);
+	data = await ticketDAO.getTicketsByStatus(status);
 	const ticket = data.Items.find(
-		ticket => ticket.id === randomTicket.id && ticket.status === APPROVED_TICKET_STATUS
+		ticket => ticket.id === randomTicket.id && ticket.status === status
 	);
-	expect(ticket).not.toBeNull();
+	expect(ticket).not.toBeUndefined();
+}
+
+test('approveTicket', async () => {
+	testTicketStatusSetter(APPROVED_TICKET_STATUS, ticketDAO.approveTicket);
+});
+
+test('denyTicket', async () => {
+	testTicketStatusSetter(DENIED_TICKET_STATUS, ticketDAO.denyTicket);
 });

@@ -2,6 +2,7 @@ require('dotenv').config();
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
 	DynamoDBDocumentClient,
+	GetCommand,
 	PutCommand,
 	QueryCommand,
 	UpdateCommand
@@ -13,6 +14,7 @@ const TICKETS_TABLE = process.env.TICKETS_TABLE;
 const TICKET_STATUS_INDEX = process.env.TICKET_STATUS_INDEX;
 const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 const APPROVED_TICKET_STATUS = process.env.APPROVED_TICKET_STATUS;
+const DENIED_TICKET_STATUS = process.env.DENIED_TICKET_STATUS;
 
 async function createTicket(amount, description) {
 	const command = new PutCommand({
@@ -22,6 +24,18 @@ async function createTicket(amount, description) {
 
 	const data = await documentClient.send(command);
 	return data;
+}
+
+async function getTicketByID(id) {
+	const command = new GetCommand({
+		TableName: TICKETS_TABLE,
+		Key: { id: id }
+	});
+
+	const data = await documentClient.send(command);
+	console.log(data);
+	return data;
+	return await documentClient.send(command);
 }
 
 async function getTicketsByStatus(status) {
@@ -37,12 +51,12 @@ async function getTicketsByStatus(status) {
 	return data;
 }
 
-async function approveTicket(id) {
+async function setTicketStatus(id, status) {
 	const command = new UpdateCommand({
 		TableName: TICKETS_TABLE,
 		Key: { id: id },
 		UpdateExpression: 'set #status = :status',
-		ExpressionAttributeValues: { ':status': APPROVED_TICKET_STATUS },
+		ExpressionAttributeValues: { ':status': status },
 		ExpressionAttributeNames: { '#status': 'status' }
 	});
 
@@ -50,8 +64,18 @@ async function approveTicket(id) {
 	return data;
 }
 
+async function approveTicket(id) {
+	return await setTicketStatus(id, APPROVED_TICKET_STATUS);
+}
+
+async function denyTicket(id) {
+	return await setTicketStatus(id, DENIED_TICKET_STATUS);
+}
+
 module.exports = {
 	createTicket,
+	getTicketByID,
 	getTicketsByStatus,
-	approveTicket
+	approveTicket,
+	denyTicket
 };
