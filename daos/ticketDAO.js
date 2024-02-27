@@ -33,9 +33,7 @@ async function getTicketByID(id) {
 	});
 
 	const data = await documentClient.send(command);
-	console.log(data);
 	return data;
-	return await documentClient.send(command);
 }
 
 async function getTicketsByStatus(status) {

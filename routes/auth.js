@@ -11,7 +11,7 @@ router.post('/register', async (req, res) => {
 		const data = await userDAO.getUserByUsername(req.body.username);
 
 		if (data.Items.length > 0) {
-			res.sendStatus(409);
+			res.status(400).json({ error: 'USERNAME EXISTS' });
 		} else {
 			const saltedPasswordHash = await bcrypt.hash(req.body.password, NUM_SALT_ROUNDS);
 			await userDAO.createUser(req.body.username, saltedPasswordHash);

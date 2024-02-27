@@ -4,6 +4,7 @@ const ticketDAO = require('../daos/ticketDAO.js');
 const router = express.Router();
 const { authorize } = require('./auth.js');
 const MANAGER_ROLE = process.env.MANAGER_ROLE;
+const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 
 router.post('/', authorize, async (req, res) => {
 	try {
@@ -21,9 +22,14 @@ router.post('/:id/approve/', authorize, async (req, res) => {
 		res.sendStatus(403);
 	} else {
 		try {
-			ticketDAO.getTicketByID(req.params.id);
-			// await approveTicket(req.params.id);
-			res.sendStatus(200);
+			const ticket = (await ticketDAO.getTicketByID(req.params.id)).Item;
+
+			if (ticket.status === PENDING_TICKET_STATUS) {
+				await ticketDAO.approveTicket(req.params.id);
+				res.sendStatus(200);
+			} else {
+				res.status(400).json({ error: 'TICKET NOT PENDING' });
+			}
 		} catch (err) {
 			res.sendStatus(500);
 			console.error(err);
