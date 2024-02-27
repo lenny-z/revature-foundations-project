@@ -24,6 +24,23 @@ router.post('/register', async (req, res) => {
 	}
 });
 
+async function register(req, res){
+	try {
+		const data = await userDAO.getUserByUsername(req.body.username);
+
+		if (data.Items.length > 0) {
+			res.status(400).json({ error: 'USERNAME EXISTS' });
+		} else {
+			const saltedPasswordHash = await bcrypt.hash(req.body.password, NUM_SALT_ROUNDS);
+			await userDAO.createUser(req.body.username, saltedPasswordHash);
+			res.sendStatus(201);
+		}
+	} catch (err) {
+		res.sendStatus(500);
+		console.error(err);
+	}
+}
+
 router.post('/login', async (req, res) => {
 	try {
 		const data = await userDAO.getUserByUsername(req.body.username);
@@ -107,6 +124,7 @@ function authorizeManager(req, res, next) {
 
 module.exports = {
 	router,
+	register,
 	authorize,
 	authorizeManager
 };
