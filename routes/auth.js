@@ -1,89 +1,70 @@
-const express = require('express');
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userDAO = require('../daos/userDAO.js');
-const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const MANAGER_ROLE = process.env.MANAGER_ROLE;
 const NUM_SALT_ROUNDS = parseInt(process.env.NUM_SALT_ROUNDS);
 
 async function register(req, res) {
+	if (!req.body || !req.body.username || !req.body.password) {
+		res.sendStatus(400);
+		return;
+	}
+
 	try {
 		const data = await userDAO.getUserByUsername(req.body.username);
 
 		if (data.Items.length > 0) {
 			res.status(400).json({ error: 'USERNAME EXISTS' });
-		} else {
-			const saltedPasswordHash = await bcrypt.hash(req.body.password, NUM_SALT_ROUNDS);
-			await userDAO.createUser(req.body.username, saltedPasswordHash);
-			res.sendStatus(201);
+			return;
 		}
+
+		const saltedPasswordHash = await bcrypt.hash(req.body.password, NUM_SALT_ROUNDS);
+		await userDAO.createUser(req.body.username, saltedPasswordHash);
+		res.sendStatus(201);
 	} catch (err) {
 		res.sendStatus(500);
 		console.error(err);
 	}
 }
 
-// router.post('/login', async (req, res) => {
-// 	try {
-// 		const data = await userDAO.getUserByUsername(req.body.username);
-
-// 		if (data.Items.length === 0) {
-// 			res.sendStatus(400);
-// 		} else {
-// 			const user = data.Items[0];
-
-// 			if (await bcrypt.compare(req.body.password, user.password)) {
-// 				const token = jwt.sign(
-// 					{
-// 						id: user.id,
-// 						username: user.username,
-// 						role: user.role
-// 					},
-// 					JWT_SECRET,
-// 					{
-// 						expiresIn: '15m'
-// 					}
-// 				);
-
-// 				res.json({ token });
-// 			} else {
-// 				res.sendStatus(400);
-// 			}
-// 		}
-// 	} catch (err) {
-// 		res.sendStatus(500);
-// 		console.error(err);
-// 	}
-// });
-
 async function login(req, res) {
+	if (!req.body || !req.body.username || !req.body.password) {
+		res.sendStatus(400);
+		return;
+	}
+
 	try {
 		const data = await userDAO.getUserByUsername(req.body.username);
 
 		if (data.Items.length === 0) {
 			res.sendStatus(400);
-		} else {
-			const user = data.Items[0];
-
-			if (await bcrypt.compare(req.body.password, user.password)) {
-				const token = jwt.sign(
-					{
-						id: user.id,
-						username: user.username,
-						role: user.role
-					},
-					JWT_SECRET,
-					{
-						expiresIn: '15m'
-					}
-				);
-
-				res.json({ token });
-			} else {
-				res.sendStatus(400);
-			}
+			return;
 		}
+		// } else {
+		const user = data.Items[0];
+
+		if (await bcrypt.compare(req.body.password, user.password)) {
+			const token = jwt.sign(
+				{
+					id: user.id,
+					username: user.username,
+					role: user.role
+				},
+				JWT_SECRET,
+				{
+					expiresIn: '15m'
+				}
+			);
+
+			res.status(200).json({ token });
+			return;
+		}
+		// } else {
+		res.sendStatus(400);
+		// }
+		// }
 	} catch (err) {
 		res.sendStatus(500);
 		console.error(err);
@@ -139,7 +120,6 @@ function authorizeManager(req, res, next) {
 }
 
 module.exports = {
-	// router,
 	login,
 	register,
 	authorize,

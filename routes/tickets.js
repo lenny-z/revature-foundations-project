@@ -5,13 +5,22 @@ const router = express.Router();
 const { authorize, authorizeManager } = require('./auth.js');
 const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 
-router.get('/?status=pending', authorize, async (req, res) => {
-
+router.get('/', authorizeManager, async (req, res) => {
+	if (req.query.status === 'pending') {
+		try {
+			res.status(200).json(await ticketDAO.getTicketsByStatus(PENDING_TICKET_STATUS));
+		} catch (err) {
+			res.sendStatus(500);
+			console.error(err);
+		}
+	} else {
+		res.sendStatus(400);
+	}
 });
 
 router.post('/', authorize, async (req, res) => {
 	try {
-		await ticketDAO.createTicket(req.body.amount, req.body.description);
+		await ticketDAO.createTicket(req.user.id, req.body.amount, req.body.description);
 		res.sendStatus(201);
 	} catch (err) {
 		res.sendStatus(500);

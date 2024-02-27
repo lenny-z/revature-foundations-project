@@ -16,14 +16,19 @@ const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 const APPROVED_TICKET_STATUS = process.env.APPROVED_TICKET_STATUS;
 const DENIED_TICKET_STATUS = process.env.DENIED_TICKET_STATUS;
 
-async function createTicket(amount, description) {
+async function createTicket(submitterID, amount, description) {
 	const command = new PutCommand({
 		TableName: TICKETS_TABLE,
-		Item: { id: uuid.v4(), amount, description, status: PENDING_TICKET_STATUS }
+		Item: {
+			id: uuid.v4(),
+			submitterID,
+			amount,
+			description,
+			status: PENDING_TICKET_STATUS
+		}
 	});
 
-	const data = await documentClient.send(command);
-	return data;
+	return await documentClient.send(command);
 }
 
 async function getTicketByID(id) {
@@ -32,8 +37,7 @@ async function getTicketByID(id) {
 		Key: { id: id }
 	});
 
-	const data = await documentClient.send(command);
-	return data;
+	return await documentClient.send(command);
 }
 
 async function getTicketsByStatus(status) {
@@ -45,8 +49,7 @@ async function getTicketsByStatus(status) {
 		ExpressionAttributeNames: { '#status': 'status' }
 	});
 
-	const data = await documentClient.send(command);
-	return data;
+	return await documentClient.send(command);
 }
 
 async function setTicketStatus(id, status) {
@@ -58,8 +61,9 @@ async function setTicketStatus(id, status) {
 		ExpressionAttributeNames: { '#status': 'status' }
 	});
 
-	const data = await documentClient.send(command);
-	return data;
+	// const data = await documentClient.send(command);
+	// return data;
+	return await documentClient.send(command);
 }
 
 async function approveTicket(id) {
