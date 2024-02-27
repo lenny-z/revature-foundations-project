@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const userDAO = require('../daos/userDAO.js');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
+const MANAGER_ROLE = process.env.MANAGER_ROLE;
 const NUM_SALT_ROUNDS = parseInt(process.env.NUM_SALT_ROUNDS);
 
 router.post('/register', async (req, res) => {
@@ -79,7 +80,33 @@ function authorize(req, res, next) {
 	}
 }
 
+function authorizeManager(req, res, next) {
+	const header = req.headers['authorization'];
+
+	if (!header) {
+		res.sendStatus(401);
+	} else {
+		const token = header.split(' ')[1];
+
+		if (!token) {
+			res.sendStatus(401);
+		} else {
+			jwt.verify(token, JWT_SECRET, (err, user) => {
+				if (err) {
+					res.sendStatus(401);
+				} else if (!user.role || user.role !== MANAGER_ROLE) {
+					res.sendStatus(403);
+				} else {
+					req.user = user;
+					next();
+				}
+			});
+		}
+	}
+}
+
 module.exports = {
 	router,
-	authorize
+	authorize,
+	authorizeManager
 };
