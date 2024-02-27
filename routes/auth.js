@@ -65,11 +65,11 @@ function authorize(req, res, next) {
 		const token = header.split(' ')[1];
 
 		if (!token) {
-			res.status(401);
+			res.sendStatus(401);
 		} else {
 			jwt.verify(token, JWT_SECRET, (err, user) => {
 				if (err) {
-					res.status(401);
+					res.sendStatus(401);
 				} else {
 					req.user = user;
 					next();
