@@ -42,7 +42,7 @@ async function login(req, res) {
 			res.sendStatus(400);
 			return;
 		}
-		// } else {
+
 		const user = data.Items[0];
 
 		if (await bcrypt.compare(req.body.password, user.password)) {
@@ -61,10 +61,7 @@ async function login(req, res) {
 			res.status(200).json({ token });
 			return;
 		}
-		// } else {
 		res.sendStatus(400);
-		// }
-		// }
 	} catch (err) {
 		res.sendStatus(500);
 		console.error(err);
@@ -76,22 +73,28 @@ function authorize(req, res, next) {
 
 	if (!header) {
 		res.sendStatus(401);
-	} else {
-		const token = header.split(' ')[1];
-
-		if (!token) {
-			res.sendStatus(401);
-		} else {
-			jwt.verify(token, JWT_SECRET, (err, user) => {
-				if (err) {
-					res.sendStatus(401);
-				} else {
-					req.user = user;
-					next();
-				}
-			});
-		}
+		return;
 	}
+	// } else {
+	const token = header.split(' ')[1];
+
+	if (!token) {
+		res.sendStatus(401);
+		return;
+	}
+	// } else {
+	jwt.verify(token, JWT_SECRET, (err, user) => {
+		if (err) {
+			res.sendStatus(401);
+			return;
+		}
+		// } else {
+		req.user = user;
+		next();
+		// }
+	});
+	// }
+	// }
 }
 
 function authorizeManager(req, res, next) {
