@@ -75,26 +75,23 @@ function authorize(req, res, next) {
 		res.sendStatus(401);
 		return;
 	}
-	// } else {
+
 	const token = header.split(' ')[1];
 
 	if (!token) {
 		res.sendStatus(401);
 		return;
 	}
-	// } else {
+
 	jwt.verify(token, JWT_SECRET, (err, user) => {
 		if (err) {
 			res.sendStatus(401);
 			return;
 		}
-		// } else {
+
 		req.user = user;
 		next();
-		// }
 	});
-	// }
-	// }
 }
 
 function authorizeManager(req, res, next) {
