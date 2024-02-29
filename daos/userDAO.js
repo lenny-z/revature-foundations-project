@@ -20,8 +20,7 @@ async function createUser(username, password, role = EMPLOYEE_ROLE) {
 		}
 	});
 
-	const data = await documentClient.send(command);
-	return data;
+	return await documentClient.send(command);
 }
 
 async function getUserByUsername(username) {
@@ -32,8 +31,7 @@ async function getUserByUsername(username) {
 		ExpressionAttributeValues: { ':username': username }
 	});
 
-	const data = await documentClient.send(command);
-	return data;
+	return await documentClient.send(command);
 }
 
 module.exports = {
