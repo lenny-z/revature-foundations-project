@@ -61,6 +61,7 @@ async function login(req, res) {
 			res.status(200).json({ token });
 			return;
 		}
+		
 		res.sendStatus(400);
 	} catch (err) {
 		res.sendStatus(500);
