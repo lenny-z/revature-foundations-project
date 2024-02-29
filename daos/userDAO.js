@@ -7,11 +7,17 @@ const uuid = require('uuid');
 const USERS_TABLE = process.env.USERS_TABLE;
 const USERNAME_INDEX = process.env.USERNAME_INDEX;
 const EMPLOYEE_ROLE = process.env.EMPLOYEE_ROLE;
+const MANAGER_ROLE = process.env.MANAGER_ROLE;
 
-async function createUser(username, password) {
+async function createUser(username, password, role = EMPLOYEE_ROLE) {
 	const command = new PutCommand({
 		TableName: USERS_TABLE,
-		Item: { id: uuid.v4(), username, password, role: EMPLOYEE_ROLE }
+		Item: {
+			id: uuid.v4(),
+			username,
+			password,
+			role: role === MANAGER_ROLE ? MANAGER_ROLE : EMPLOYEE_ROLE
+		}
 	});
 
 	const data = await documentClient.send(command);

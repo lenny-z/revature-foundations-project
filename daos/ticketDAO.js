@@ -41,24 +41,12 @@ async function getTicketByID(id) {
 	return await documentClient.send(command);
 }
 
-async function getTicketsByStatus(status) {
-	const command = new QueryCommand({
-		TableName: TICKETS_TABLE,
-		IndexName: TICKET_STATUS_INDEX,
-		KeyConditionExpression: '#status = :status',
-		ExpressionAttributeValues: { ':status': status },
-		ExpressionAttributeNames: { '#status': 'status' }
-	});
-
-	return await documentClient.send(command);
-}
-
 async function managerGetPendingTickets() {
 	const command = new QueryCommand({
 		TableName: TICKETS_TABLE,
 		IndexName: TICKET_STATUS_INDEX,
 		KeyConditionExpression: '#status = :status',
-		ExpressionAttributeValues: { ':status': status },
+		ExpressionAttributeValues: { ':status': PENDING_TICKET_STATUS },
 		ExpressionAttributeNames: { '#status': 'status' }
 	});
 
@@ -99,7 +87,6 @@ async function denyTicket(id) {
 module.exports = {
 	createTicket,
 	getTicketByID,
-	getTicketsByStatus,
 	managerGetPendingTickets,
 	employeeGetTickets,
 	approveTicket,

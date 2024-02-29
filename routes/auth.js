@@ -21,7 +21,7 @@ async function register(req, res) {
 		}
 
 		const saltedPasswordHash = await bcrypt.hash(req.body.password, NUM_SALT_ROUNDS);
-		await userDAO.createUser(req.body.username, saltedPasswordHash);
+		await userDAO.createUser(req.body.username, saltedPasswordHash, req.body.role);
 		res.sendStatus(201);
 	} catch (err) {
 		res.sendStatus(500);
@@ -70,22 +70,23 @@ async function login(req, res) {
 
 function authorize(req, res, next) {
 	const header = req.headers['authorization'];
-
+	
 	if (!header) {
 		res.sendStatus(401);
 		return;
 	}
-
+	
 	const token = header.split(' ')[1];
-
+	
 	if (!token) {
 		res.sendStatus(401);
 		return;
 	}
-
+	
 	jwt.verify(token, JWT_SECRET, (err, user) => {
 		if (err) {
 			res.sendStatus(401);
+			console.error(err);
 			return;
 		}
 
@@ -94,30 +95,17 @@ function authorize(req, res, next) {
 	});
 }
 
-function authorizeManager(req, res, next) {
-	const header = req.headers['authorization'];
-
-	if (!header) {
-		res.sendStatus(401);
-	} else {
-		const token = header.split(' ')[1];
-
-		if (!token) {
-			res.sendStatus(401);
-		} else {
-			jwt.verify(token, JWT_SECRET, (err, user) => {
-				if (err) {
-					res.sendStatus(401);
-				} else if (!user.role || user.role !== MANAGER_ROLE) {
-					res.sendStatus(403);
-				} else {
-					req.user = user;
-					next();
-				}
-			});
+const authorizeManager = [
+	authorize,
+	(req, res, next) => {
+		if (req.user.role !== MANAGER_ROLE) {
+			res.sendStatus(403);
+			return;
 		}
+
+		next();
 	}
-}
+]
 
 module.exports = {
 	login,

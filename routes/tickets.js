@@ -8,9 +8,8 @@ const EMPLOYEE_ROLE = process.env.EMPLOYEE_ROLE;
 const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 
 router.get('/', authorize, async (req, res) => {
-	if (req.user.role === MANAGER_ROLE && req.query.status === 'pending') {
+	if (req.user.role === MANAGER_ROLE) {
 		try {
-			// res.status(200).json(await ticketDAO.getTicketsByStatus(PENDING_TICKET_STATUS));
 			res.status(200).json(await ticketDAO.managerGetPendingTickets());
 		} catch (err) {
 			res.sendStatus(500);
@@ -24,16 +23,6 @@ router.get('/', authorize, async (req, res) => {
 			console.error(err);
 		}
 	}
-	// if (req.query.status === 'pending') {
-	// try {
-	// 	res.status(200).json(await ticketDAO.getTicketsByStatus(PENDING_TICKET_STATUS));
-	// } catch (err) {
-	// 	res.sendStatus(500);
-	// 	console.error(err);
-	// }
-	// else {
-	// 	res.sendStatus(400);
-	// }
 });
 
 router.post('/', authorize, async (req, res) => {
