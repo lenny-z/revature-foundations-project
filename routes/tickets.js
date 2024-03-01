@@ -10,14 +10,14 @@ const PENDING_TICKET_STATUS = process.env.PENDING_TICKET_STATUS;
 router.get('/', authorize, async (req, res) => {
 	if (req.user.role === MANAGER_ROLE) {
 		try {
-			res.status(200).json(await ticketDAO.managerGetPendingTickets());
+			res.status(200).json(await ticketDAO.getPendingTickets());
 		} catch (err) {
 			res.sendStatus(500);
 			console.error(err);
 		}
 	} else if (req.user.role === EMPLOYEE_ROLE) {
 		try {
-			res.status(200).json(await ticketDAO.employeeGetTickets(req.user.id));
+			res.status(200).json(await ticketDAO.getTicketsBySubmitterID(req.user.id));
 		} catch (err) {
 			res.sendStatus(500);
 			console.error(err);
