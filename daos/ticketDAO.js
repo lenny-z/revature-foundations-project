@@ -41,7 +41,7 @@ async function getTicketByID(id) {
 	return await documentClient.send(command);
 }
 
-async function managerGetPendingTickets() {
+async function getPendingTickets() {
 	const command = new QueryCommand({
 		TableName: TICKETS_TABLE,
 		IndexName: TICKET_STATUS_INDEX,
@@ -53,12 +53,12 @@ async function managerGetPendingTickets() {
 	return await documentClient.send(command);
 }
 
-async function employeeGetTickets(id) {
+async function getTicketsBySubmitterID(submitterID) {
 	const command = new QueryCommand({
 		TableName: TICKETS_TABLE,
 		IndexName: TICKET_SUBMITTER_ID_INDEX,
 		KeyConditionExpression: 'submitterID = :submitterID',
-		ExpressionAttributeValues: { ':submitterID': id }
+		ExpressionAttributeValues: { ':submitterID': submitterID }
 	});
 
 	return await documentClient.send(command);
@@ -87,8 +87,8 @@ async function denyTicket(id) {
 module.exports = {
 	createTicket,
 	getTicketByID,
-	managerGetPendingTickets,
-	employeeGetTickets,
+	getPendingTickets: getPendingTickets,
+	getTicketsBySubmitterID: getTicketsBySubmitterID,
 	approveTicket,
 	denyTicket
 };
